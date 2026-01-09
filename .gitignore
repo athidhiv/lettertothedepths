@@ -1,5 +1,6 @@
 # Dependency folders
 node_modules/
+contentAI/
 __pycache__/
 *.pyc
 
