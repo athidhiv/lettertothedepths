@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    { 
+      "source": "/api/predict", 
+      "destination": "/api/predict.py" 
+    },
+    { 
+      "source": "/api/(.*)", 
+      "destination": "/api/server.js" 
+    }
+  ]
+}

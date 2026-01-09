@@ -3,11 +3,13 @@ const messageSection = document.getElementById('message-section');
 
 /* ---------------- API ---------------- */
 const api = {
+    // We remove "http://localhost:3000" and just use the URL
+    // Vercel will automatically point this to your current domain
     get: (url) =>
-        fetch(`http://localhost:3000${url}`).then(res => res.json()),
+        fetch(`/api${url}`).then(res => res.json()),
 
     post: (url, body = {}) =>
-        fetch(`http://localhost:3000${url}`, {
+        fetch(`/api${url}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -17,7 +19,7 @@ const api = {
 async function isSafe(text) {
     try {
         // This points to your Python Flask server
-        const response = await fetch('http://localhost:5000/predict', {
+        const response = await fetch('/api/predict', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: text })

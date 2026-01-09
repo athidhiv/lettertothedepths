@@ -1,0 +1,14 @@
+# Dependency folders
+node_modules/
+__pycache__/
+*.pyc
+
+# Environment variables (Private keys)
+.env
+
+# Large Model files (If you decide not to upload them)
+# word2vec_model.model
+
+# OS generated files
+.DS_Store
+Thumbs.db
