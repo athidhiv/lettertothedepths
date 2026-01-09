@@ -1,0 +1,6 @@
+import kagglehub
+
+# Download latest version
+path = kagglehub.model_download("oleksiivalitov/toxic-comments-rnn/pyTorch/epoch_10")
+
+print("Path to model files:", path)
