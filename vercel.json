@@ -1,12 +1,13 @@
 {
+  "version": 2,
+  "builds": [
+    { "src": "api/app.py", "use": "@vercel/python" },
+    { "src": "api/server.js", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" }
+  ],
   "rewrites": [
-    { 
-      "source": "/api/predict", 
-      "destination": "/api/predict.py" 
-    },
-    { 
-      "source": "/api/(.*)", 
-      "destination": "/api/server.js" 
-    }
+    { "source": "/api/predict", "destination": "api/app.py" },
+    { "source": "/api/(.*)", "destination": "api/server.js" },
+    { "source": "/(.*)", "destination": "/$1" }
   ]
 }
