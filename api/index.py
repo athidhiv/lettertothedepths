@@ -6,17 +6,28 @@ import joblib
 import os
 import datetime
 import random
-
 app = Flask(__name__)
 CORS(app)
 
-# --- Configuration ---
-app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
-mongo = PyMongo(app)
+# 1. Get URI from environment
+uri = os.environ.get("MONGO_URI")
 
-# Helper function to prevent crash on startup
+# 2. Extract database name from URI (Mongoose does this automatically, PyMongo needs help)
+# If your URI is mongodb+srv://.../dbname?..., this gets 'dbname'
+db_name = uri.split('/')[-1].split('?')[0] 
+
+app.config["MONGO_URI"] = uri
+# Explicitly tell Flask-PyMongo which database to use
+mongo = PyMongo(app, uri=uri)
+
 def get_db():
-    return mongo.db.messages
+    # If the connection is failing, this will now tell us WHY in the logs
+    if mongo.db is None:
+        print(f"DEBUG: MONGO_URI starts with: {uri[:15]}...")
+        print(f"DEBUG: Detected DB Name: {db_name}")
+        raise RuntimeError("Database connection not established. Check MONGO_URI and Network Access.")
+    return mongo.db[db_name].messages # Use the explicit database name
+
 
 # --- Load ML Models ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
