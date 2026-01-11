@@ -1,14 +1,24 @@
-# Dependency folders
-node_modules/
-__pycache__/
-*.pyc
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Generated / local folders
-contentAI/
+node_modules
+dist
+dist-ssr
+*.local
 
-# Environment variables (PRIVATE)
-.env
-
-# OS generated files
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
