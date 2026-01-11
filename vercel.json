@@ -1,9 +1,0 @@
-{
-  "version": 2,
-  "rewrites": [
-    { "source": "/api/predict", "destination": "api/app.py" },
-    { "source": "/api/(.*)", "destination": "api/server.js" },
-    { "source": "/assets/(.*)", "destination": "/assets/$1" },
-    { "source": "/(.*)", "destination": "/$1" }
-  ]
-}
