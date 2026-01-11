@@ -1,43 +1,36 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_pymongo import PyMongo
+from pymongo import MongoClient
 from bson.objectid import ObjectId
 import joblib
 import os
 import datetime
 import random
+
 app = Flask(__name__)
 CORS(app)
 
-# 1. Get URI from environment
-from pymongo import MongoClient
-
-# --- Configuration ---
+# --- Database Connection ---
 MONGO_URI = os.environ.get("MONGO_URI")
 
-# 1. Initialize the client (Official driver, not the Flask wrapper)
-# connectTimeoutMS=5000 prevents the app from hanging forever if the DB is down
+# Initialize client at the top level for connection pooling
 client = MongoClient(MONGO_URI, connectTimeoutMS=5000, serverSelectionTimeoutMS=5000)
 
 def get_db():
     try:
-        # 2. Extract DB Name safely
+        # Extract DB name from URI
         db_name = MONGO_URI.split('/')[-1].split('?')[0]
         if not db_name:
-            db_name = "test" # Default MongoDB name if none specified
+            db_name = "test"
             
-        # 3. Select the database and collection
         db = client[db_name]
-        
-        # 4. CRITICAL: Force a connection check (The "Ping")
-        # This will throw an error NOW if the password or IP whitelist is wrong
+        # Verify connection
         client.admin.command('ping')
-        
         return db.messages
     except Exception as e:
-        # This will now print the EXACT error (e.g., "Authentication failed")
         print(f"DATABASE ERROR: {e}")
         raise RuntimeError(f"MongoDB Connection Failed: {e}")
+
 # --- Load ML Models ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 vectorizer = joblib.load(os.path.join(BASE_DIR, 'tfidf_vectorizer.pkl'))
@@ -83,7 +76,7 @@ def get_random():
     selected = get_db().find_one_and_update(
         {"locked": False},
         {"$set": {"locked": True, "lockedAt": datetime.datetime.utcnow()}},
-        new=True
+        return_document=True # Note: In pymongo use return_document=True instead of new=True
     )
 
     if not selected:
