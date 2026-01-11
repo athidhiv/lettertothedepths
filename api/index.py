@@ -10,25 +10,34 @@ app = Flask(__name__)
 CORS(app)
 
 # 1. Get URI from environment
-uri = os.environ.get("MONGO_URI")
+from pymongo import MongoClient
 
-# 2. Extract database name from URI (Mongoose does this automatically, PyMongo needs help)
-# If your URI is mongodb+srv://.../dbname?..., this gets 'dbname'
-db_name = uri.split('/')[-1].split('?')[0] 
+# --- Configuration ---
+MONGO_URI = os.environ.get("MONGO_URI")
 
-app.config["MONGO_URI"] = uri
-# Explicitly tell Flask-PyMongo which database to use
-mongo = PyMongo(app, uri=uri)
+# 1. Initialize the client (Official driver, not the Flask wrapper)
+# connectTimeoutMS=5000 prevents the app from hanging forever if the DB is down
+client = MongoClient(MONGO_URI, connectTimeoutMS=5000, serverSelectionTimeoutMS=5000)
 
 def get_db():
-    # If the connection is failing, this will now tell us WHY in the logs
-    if mongo.db is None:
-        print(f"DEBUG: MONGO_URI starts with: {uri[:15]}...")
-        print(f"DEBUG: Detected DB Name: {db_name}")
-        raise RuntimeError("Database connection not established. Check MONGO_URI and Network Access.")
-    return mongo.db[db_name].messages # Use the explicit database name
-
-
+    try:
+        # 2. Extract DB Name safely
+        db_name = MONGO_URI.split('/')[-1].split('?')[0]
+        if not db_name:
+            db_name = "test" # Default MongoDB name if none specified
+            
+        # 3. Select the database and collection
+        db = client[db_name]
+        
+        # 4. CRITICAL: Force a connection check (The "Ping")
+        # This will throw an error NOW if the password or IP whitelist is wrong
+        client.admin.command('ping')
+        
+        return db.messages
+    except Exception as e:
+        # This will now print the EXACT error (e.g., "Authentication failed")
+        print(f"DATABASE ERROR: {e}")
+        raise RuntimeError(f"MongoDB Connection Failed: {e}")
 # --- Load ML Models ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 vectorizer = joblib.load(os.path.join(BASE_DIR, 'tfidf_vectorizer.pkl'))
